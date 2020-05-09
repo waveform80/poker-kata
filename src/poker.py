@@ -87,7 +87,7 @@ class Hand:
         return 'Hand([%s])' % ', '.join(repr(card) for card in self)
 
     def __str__(self):
-        return '%s  \N{RIGHTWARDS DOUBLE ARROW} %s' % (
+        return '0 1 2 3 4\n%s  \N{RIGHTWARDS DOUBLE ARROW} %s' % (
             ' '.join(str(card) for card in self),
             self.hand
         )
@@ -130,7 +130,7 @@ class Hand:
             # general case
             scores == list(range(self[0].score, self[0].score + 5))
         )
-        if all(c.suit == self[0].suit for c in self[1:]):
+        if all(card.suit == self[0].suit for card in self[1:]):
             if scores == [8, 9, 10, 11, 12]:
                 return 'royal flush'
             elif is_straight:
@@ -156,7 +156,8 @@ class Hand:
         return Hand.values.index(self.hand)
 
     def exchange(self, deck, *cards):
-        # XXX Should check all cards are in self before redrawing any
+        assert len(cards) == len(set(cards))
+        assert set(cards) <= set(self)
         for card in cards:
             self._cards.remove(card)
             deck.discard(card)
@@ -176,6 +177,13 @@ class Deck:
     def __repr__(self):
         return '<Deck cards=%d discard=%d>' % (
             len(self._cards), len(self._discard)
+        )
+
+    def __str__(self):
+        return (
+            'Deck:    \N{PLAYING CARD BACK}  (%d)\n'
+            'Discard: \N{PLAYING CARD BACK}  (%d)' % (
+                len(self._cards), len(self._discard))
         )
 
     def __iter__(self):
@@ -210,3 +218,16 @@ class Deck:
         self._cards.extend(self._discard)
         self._discard = []
         shuffle(self._cards)
+
+
+class Player:
+    def __init__(self, cash):
+        self.pot = cash
+        self.hand = None
+
+    
+
+
+class Game:
+    def __init__(self, players=4):
+        self.deck = Deck()
